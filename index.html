@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pathfinder — RIASEC Major Fit Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal:#2DD4BF;
+    --violet:#8B5CF6;
+    --navy:#12142A;
+    --bg:#F4F5FA;
+    --card:#FFFFFF;
+    --ink:#1B1E2E;
+    --muted:#8A8FA3;
+    --line:#E7E8F1;
+    --radius:22px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  html,body{
+    background:var(--bg);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Outfit',sans-serif;
+  }
+  .topbar{
+    background:var(--navy);
+    color:#fff;
+    padding:18px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  .topbar .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Outfit',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    letter-spacing:0.2px;
+  }
+  .brand-mark{
+    width:26px;height:26px;border-radius:8px;
+    background:linear-gradient(135deg,var(--teal),var(--violet));
+    flex-shrink:0;
+  }
+  .topbar .progress-wrap{
+    flex:1;
+    max-width:280px;
+    margin-left:20px;
+    height:8px;
+    background:rgba(255,255,255,0.14);
+    border-radius:99px;
+    overflow:hidden;
+  }
+  .topbar .progress-bar{
+    height:100%;
+    background:linear-gradient(90deg,var(--teal),var(--violet));
+    width:0%;
+    transition:width .35s ease;
+  }
+  .topbar .progress-num{
+    font-size:12px;
+    color:rgba(255,255,255,0.7);
+    margin-left:12px;
+    white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+  }
+  .wrap{
+    max-width:640px;
+    margin:0 auto;
+    padding:28px 20px 80px;
+  }
+  /* ---------- Intro ---------- */
+  .intro-card{
+    background:var(--card);
+    border-radius:28px;
+    padding:40px 28px;
+    text-align:center;
+    box-shadow:0 10px 30px rgba(20,20,50,0.06);
+  }
+  .intro-eyebrow{
+    display:inline-block;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--violet);
+    background:rgba(139,92,246,0.08);
+    padding:6px 14px;
+    border-radius:99px;
+    margin-bottom:18px;
+  }
+  .intro-card h1{
+    font-size:28px;
+    font-weight:700;
+    line-height:1.3;
+    margin:0 0 14px;
+  }
+  .intro-card p{
+    color:var(--muted);
+    font-size:15px;
+    line-height:1.7;
+    margin:0 0 26px;
+  }
+  .intro-meta{
+    display:flex;
+    justify-content:center;
+    gap:22px;
+    margin-bottom:30px;
+    flex-wrap:wrap;
+  }
+  .intro-meta div{
+    font-size:13px;
+    color:var(--muted);
+  }
+  .intro-meta strong{
+    display:block;
+    font-family:'Outfit',sans-serif;
+    font-size:20px;
+    color:var(--ink);
+    font-weight:700;
+  }
+  .btn-primary{
+    border:none;
+    cursor:pointer;
+    color:#fff;
+    font-family:'Outfit',sans-serif;
+    font-weight:600;
+    font-size:16px;
+    padding:16px 36px;
+    border-radius:99px;
+    background:linear-gradient(90deg,var(--teal),var(--violet));
+    box-shadow:0 8px 20px rgba(139,92,246,0.28);
+    transition:transform .15s ease;
+  }
+  .btn-primary:active{transform:scale(0.97);}
+  .majors-chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    margin-top:28px;
+  }
+  .chip{
+    font-size:12px;
+    color:var(--ink);
+    background:var(--bg);
+    border:1px solid var(--line);
+    padding:6px 12px;
+    border-radius:99px;
+  }
+  /* ---------- Quiz ---------- */
+  .q-card{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:36px 26px;
+    box-shadow:0 10px 30px rgba(20,20,50,0.06);
+    animation:fadeUp .35s ease;
+  }
+  @keyframes fadeUp{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .q-index{
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:1px;
+    color:var(--muted);
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  .q-text{
+    font-size:22px;
+    font-weight:600;
+    line-height:1.5;
+    margin:0 0 34px;
+    font-family:'Outfit',sans-serif;
+  }
+  .pills{
+    display:flex;
+    gap:10px;
+    justify-content:space-between;
+  }
+  .pill{
+    flex:1;
+    height:64px;
+    border-radius:16px;
+    border:2px solid var(--line);
+    background:#fff;
+    cursor:pointer;
+    transition:all .18s ease;
+    position:relative;
+  }
+  .pill:hover{transform:translateY(-2px);}
+  .pill[data-val="1"]{background:rgba(45,212,191,0.16); border-color:rgba(45,212,191,0.35);}
+  .pill[data-val="2"]{background:rgba(45,212,191,0.08); border-color:rgba(45,212,191,0.22);}
+  .pill[data-val="3"]{background:#F2F2F7; border-color:var(--line);}
+  .pill[data-val="4"]{background:rgba(139,92,246,0.08); border-color:rgba(139,92,246,0.22);}
+  .pill[data-val="5"]{background:rgba(139,92,246,0.16); border-color:rgba(139,92,246,0.35);}
+  .pill.selected{
+    border-color:var(--ink) !important;
+    box-shadow:0 0 0 2px var(--ink) inset;
+  }
+  .pill-labels{
+    display:flex;
+    justify-content:space-between;
+    margin-top:12px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1px;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+  .q-nav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:22px;
+  }
+  .back-link{
+    font-size:13px;
+    color:var(--muted);
+    cursor:pointer;
+    background:none;
+    border:none;
+    font-family:'Inter',sans-serif;
+    padding:6px 0;
+  }
+  .back-link:disabled{opacity:0.3; cursor:default;}
+  .section-tag{
+    font-size:12px;
+    color:var(--violet);
+    font-weight:600;
+  }
+  /* ---------- Results ---------- */
+  .results-hero{
+    background:var(--navy);
+    color:#fff;
+    border-radius:28px;
+    padding:34px 26px;
+    text-align:center;
+    margin-bottom:22px;
+  }
+  .results-hero .eyebrow{
+    font-size:12px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:rgba(255,255,255,0.55);
+    margin-bottom:10px;
+  }
+  .results-hero h2{
+    font-size:30px;
+    margin:0 0 6px;
+    font-weight:700;
+  }
+  .results-hero .code{
+    display:inline-block;
+    font-family:'Outfit',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    color:var(--teal);
+    background:rgba(45,212,191,0.12);
+    padding:5px 14px;
+    border-radius:99px;
+    margin-bottom:16px;
+  }
+  .results-hero .pct{
+    font-family:'Outfit',sans-serif;
+    font-size:52px;
+    font-weight:800;
+    background:linear-gradient(90deg,var(--teal),var(--violet));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    line-height:1;
+    margin-bottom:6px;
+  }
+  .results-hero .pct-label{
+    font-size:12px;
+    color:rgba(255,255,255,0.55);
+  }
+  .card-block{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:26px 24px;
+    margin-bottom:18px;
+    box-shadow:0 10px 30px rgba(20,20,50,0.05);
+  }
+  .card-block h3{
+    font-size:16px;
+    margin:0 0 4px;
+  }
+  .card-block .sub{
+    font-size:12.5px;
+    color:var(--muted);
+    margin-bottom:18px;
+  }
+  .riasec-bars{display:flex; flex-direction:column; gap:14px;}
+  .riasec-bar-row{
+    display:grid;
+    grid-template-columns:86px 1fr 42px;
+    align-items:center;
+    gap:12px;
+  }
+  .riasec-bar-label{
+    display:flex;
+    flex-direction:column;
+    line-height:1.25;
+  }
+  .riasec-bar-label .letter{
+    font-family:'Outfit',sans-serif;
+    font-weight:800;
+    font-size:16px;
+    color:var(--ink);
+  }
+  .riasec-bar-label .name{
+    font-size:10.5px;
+    color:var(--muted);
+  }
+  .riasec-bar-track{
+    height:14px;
+    background:var(--bg);
+    border-radius:99px;
+    overflow:hidden;
+  }
+  .riasec-bar-fill{
+    height:100%;
+    border-radius:99px;
+    background:linear-gradient(90deg,var(--teal),var(--violet));
+    width:0%;
+    transition:width .6s ease;
+  }
+  .riasec-bar-value{
+    font-family:'Outfit',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    text-align:right;
+  }
+  .radar-legend{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-top:16px;
+    font-size:12px;
+    color:var(--muted);
+  }
+  .radar-legend b{color:var(--ink);}
+  .rank-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .rank-row:last-child{border-bottom:none;}
+  .rank-num{
+    font-family:'Outfit',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    color:var(--muted);
+    width:20px;
+    flex-shrink:0;
+  }
+  .rank-main{flex:1; min-width:0;}
+  .rank-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:6px;
+    gap:8px;
+  }
+  .rank-name{
+    font-weight:600;
+    font-size:14.5px;
+  }
+  .rank-pct{
+    font-family:'Outfit',sans-serif;
+    font-weight:700;
+    font-size:14.5px;
+    flex-shrink:0;
+  }
+  .rank-bar-bg{
+    height:8px;
+    background:var(--bg);
+    border-radius:99px;
+    overflow:hidden;
+  }
+  .rank-bar-fill{
+    height:100%;
+    border-radius:99px;
+    background:linear-gradient(90deg,var(--teal),var(--violet));
+  }
+  .rank-detail{
+    font-size:11.5px;
+    color:var(--muted);
+    margin-top:6px;
+    line-height:1.5;
+  }
+  .rank-detail .code-badge{
+    display:inline-block;
+    font-weight:700;
+    color:var(--violet);
+    margin-right:6px;
+  }
+  .retake-btn{
+    display:block;
+    width:100%;
+    margin-top:6px;
+    border:2px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    font-family:'Outfit',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    padding:14px;
+    border-radius:14px;
+    cursor:pointer;
+  }
+  /* ---------- AI Insights ---------- */
+  .ai-card{position:relative;}
+  .ai-card .sub{margin-bottom:16px;}
+  .key-link{
+    font-size:11.5px;
+    color:var(--violet);
+    background:none;
+    border:none;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+    padding:0;
+    text-decoration:underline;
+  }
+  .ai-generate-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    border:none;
+    cursor:pointer;
+    color:#fff;
+    font-family:'Outfit',sans-serif;
+    font-weight:600;
+    font-size:14.5px;
+    padding:14px;
+    border-radius:14px;
+    background:linear-gradient(90deg,var(--teal),var(--violet));
+  }
+  .ai-generate-btn:disabled{opacity:0.6; cursor:default;}
+  .spinner{
+    width:15px;height:15px;
+    border:2px solid rgba(255,255,255,0.4);
+    border-top-color:#fff;
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+    display:none;
+  }
+  .spinner.show{display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .ai-error{
+    font-size:12.5px;
+    color:#DC5A5A;
+    margin-top:10px;
+    line-height:1.5;
+    display:none;
+  }
+  .ai-error.show{display:block;}
+  .ai-results{
+    margin-top:20px;
+    display:none;
+  }
+  .ai-results.show{display:grid; gap:16px;}
+  .ai-col-title{
+    font-family:'Outfit',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    gap:7px;
+  }
+  .dot-good{width:8px;height:8px;border-radius:50%;background:var(--teal);}
+  .dot-bad{width:8px;height:8px;border-radius:50%;background:var(--violet);}
+  .ai-list{margin:0; padding:0; list-style:none;}
+  .ai-list li{
+    font-size:13px;
+    line-height:1.6;
+    padding:9px 0 9px 18px;
+    position:relative;
+    border-bottom:1px solid var(--line);
+  }
+  .ai-list li:last-child{border-bottom:none;}
+  .ai-list li::before{
+    content:'';
+    position:absolute;
+    left:0; top:16px;
+    width:6px; height:6px;
+    border-radius:50%;
+    background:var(--line);
+  }
+  /* ---------- Key Modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(18,20,42,0.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:100;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-card{
+    background:#fff;
+    border-radius:22px;
+    padding:28px 24px;
+    max-width:380px;
+    width:100%;
+  }
+  .modal-card h3{margin:0 0 8px; font-size:17px;}
+  .modal-card p{font-size:13px; color:var(--muted); line-height:1.6; margin:0 0 16px;}
+  .modal-card a{color:var(--violet);}
+  .modal-input{
+    width:100%;
+    padding:13px 14px;
+    border-radius:12px;
+    border:2px solid var(--line);
+    font-size:13px;
+    font-family:'Inter',sans-serif;
+    margin-bottom:14px;
+  }
+  .modal-actions{display:flex; gap:10px;}
+  .modal-actions button{
+    flex:1;
+    border:none;
+    cursor:pointer;
+    padding:12px;
+    border-radius:12px;
+    font-family:'Outfit',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+  }
+  .modal-save{background:linear-gradient(90deg,var(--teal),var(--violet)); color:#fff;}
+  .modal-cancel{background:var(--bg); color:var(--ink);}
+  /* ---------- RIASEC info box ---------- */
+  .riasec-info{
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.9;
+    background:var(--bg);
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:18px;
+  }
+  .riasec-info strong{color:var(--ink); display:block; margin-bottom:6px; font-size:13px;}
+  .riasec-def{
+    display:inline-block;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:99px;
+    padding:3px 10px;
+    margin:2px 4px 2px 0;
+    font-size:11px;
+    color:var(--ink);
+  }
+  .riasec-def b{color:var(--violet);}
+  /* ---------- View all toggle ---------- */
+  .view-all-btn{
+    display:block;
+    width:100%;
+    margin-top:14px;
+    border:2px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    font-family:'Outfit',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    padding:12px;
+    border-radius:12px;
+    cursor:pointer;
+  }
+  /* ---------- Why button / panel ---------- */
+  .why-btn{
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--violet);
+    background:rgba(139,92,246,0.08);
+    border:none;
+    border-radius:99px;
+    padding:5px 12px;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .rank-actions{
+    display:flex;
+    gap:8px;
+    margin-top:8px;
+    flex-wrap:wrap;
+  }
+  .skill-btn{
+    color:var(--teal-dark, #0F9C8B);
+    background:rgba(45,212,191,0.12);
+  }
+  .why-panel{
+    display:none;
+    margin-top:10px;
+    background:var(--bg);
+    border-radius:12px;
+    padding:14px 16px;
+  }
+  .why-panel.show{display:block;}
+  .why-panel .why-lede{
+    font-size:12.5px;
+    font-weight:600;
+    margin-bottom:8px;
+  }
+  .why-panel ul{margin:0; padding-left:16px;}
+  .why-panel li{font-size:12px; line-height:1.7; color:var(--ink);}
+  /* ---------- What if simulator ---------- */
+  .whatif-buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .whatif-btn{
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink);
+    background:var(--bg);
+    border:2px solid var(--line);
+    border-radius:99px;
+    padding:9px 14px;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .whatif-btn.active{
+    border-color:var(--violet);
+    background:rgba(139,92,246,0.08);
+    color:var(--violet);
+  }
+  .whatif-results{margin-top:16px;}
+  .whatif-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+    font-size:13px;
+  }
+  .whatif-row:last-child{border-bottom:none;}
+  .whatif-delta{
+    font-family:'Outfit',sans-serif;
+    font-weight:700;
+    font-size:13px;
+  }
+  .whatif-delta .old{color:var(--muted); font-weight:500;}
+  .whatif-delta .arrow{color:var(--muted); margin:0 4px;}
+  .whatif-delta .new{color:var(--teal);}
+  .whatif-empty{font-size:12.5px; color:var(--muted);}
+  .hidden{display:none !important;}
+  footer.note{
+    text-align:center;
+    font-size:11.5px;
+    color:var(--muted);
+    margin-top:20px;
+    line-height:1.6;
+  }
+  @media(max-width:420px){
+    .q-text{font-size:19px;}
+    .pill{height:56px;}
+    .results-hero .pct{font-size:44px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="brand-mark"></span><span>Pathfinder</span></div>
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="progress-num" id="progressNum">0 / 57</div>
+</div>
+
+<div class="wrap">
+
+  <!-- INTRO -->
+  <div id="screen-intro">
+    <div class="intro-card">
+      <span class="intro-eyebrow">RIASEC × Career Fit</span>
+      <h1>ค้นหาสาขาที่ใช่กับตัวคุณ</h1>
+      <p>ตอบคำถาม 57 ข้อตามความรู้สึกจริง ไม่มีคำตอบถูกหรือผิด ระบบจะวิเคราะห์รูปแบบ RIASEC ของคุณ แล้วจับคู่กับ 8 สาขาวิชา พร้อมเปอร์เซ็นต์ความเหมาะสมของแต่ละสาขา</p>
+      <div class="intro-meta">
+        <div><strong>57</strong>คำถาม</div>
+        <div><strong>~8</strong>นาที</div>
+        <div><strong>8</strong>สาขาวิชา</div>
+      </div>
+      <button class="btn-primary" onclick="startTest()">เริ่มทำแบบทดสอบ</button>
+      <div class="majors-chips">
+        <span class="chip">Computer Engineering</span>
+        <span class="chip">Computer Science</span>
+        <span class="chip">Medicine</span>
+        <span class="chip">Business</span>
+        <span class="chip">Law</span>
+        <span class="chip">Architecture</span>
+        <span class="chip">Education</span>
+        <span class="chip">Psychology</span>
+      </div>
+    </div>
+    <footer class="note">แบบทดสอบนี้เป็นเครื่องมือสำรวจเบื้องต้นเพื่อประกอบการตัดสินใจ ไม่ใช่การวินิจฉัยทางจิตวิทยาอย่างเป็นทางการ</footer>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="screen-quiz" class="hidden">
+    <div class="q-card">
+      <div class="section-tag" id="sectionTag"></div>
+      <div class="q-index" id="qIndex"></div>
+      <h2 class="q-text" id="qText"></h2>
+      <div class="pills" id="pills">
+        <div class="pill" data-val="1" onclick="answer(1)"></div>
+        <div class="pill" data-val="2" onclick="answer(2)"></div>
+        <div class="pill" data-val="3" onclick="answer(3)"></div>
+        <div class="pill" data-val="4" onclick="answer(4)"></div>
+        <div class="pill" data-val="5" onclick="answer(5)"></div>
+      </div>
+      <div class="pill-labels"><span>Disagree</span><span>Agree</span></div>
+      <div class="q-nav">
+        <button class="back-link" id="backBtn" onclick="goBack()">← ย้อนกลับ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screen-results" class="hidden">
+    <div class="results-hero">
+      <div class="eyebrow">Best Fit Major</div>
+      <h2 id="topMajorName"></h2>
+      <div class="code" id="topMajorCode"></div>
+      <div class="pct" id="topMajorPct"></div>
+      <div class="pct-label">Compatibility Score</div>
+    </div>
+
+    <div class="card-block">
+      <h3>RIASEC Profile</h3>
+      <div class="sub">คะแนนบุคลิกภาพเชิงอาชีพ 6 ด้านของคุณ</div>
+      <div class="riasec-info">
+        <strong>RIASEC คืออะไร?</strong> เป็นทฤษฎีของ John Holland ที่แบ่งบุคลิกภาพเชิงอาชีพออกเป็น 6 แบบ:
+        <span class="riasec-def"><b>R</b>ealistic — ลงมือทำ/เครื่องมือ</span>
+        <span class="riasec-def"><b>I</b>nvestigative — วิเคราะห์/วิจัย</span>
+        <span class="riasec-def"><b>A</b>rtistic — สร้างสรรค์</span>
+        <span class="riasec-def"><b>S</b>ocial — ช่วยเหลือผู้อื่น</span>
+        <span class="riasec-def"><b>E</b>nterprising — นำ/โน้มน้าว</span>
+        <span class="riasec-def"><b>C</b>onventional — มีระบบระเบียบ</span>
+        แต่ละสาขาวิชาจะมีรหัส 3 ตัวอักษรที่โดดเด่นที่สุด เช่น Computer Science คือ I-C-R
+      </div>
+      <div class="riasec-bars" id="riasecBars"></div>
+    </div>
+
+    <div class="card-block">
+      <h3>สาขาที่เหมาะกับคุณ — Top 3</h3>
+      <div class="sub">คำนวณจากคำตอบทั้ง 57 ข้อ เทียบกับโปรไฟล์ของแต่ละสาขา</div>
+      <div id="rankListTop"></div>
+      <div id="rankListRest" class="hidden"></div>
+      <button class="view-all-btn" id="viewAllBtn" onclick="toggleAllResults()">ดูผลลัพธ์ทั้งหมด (8 สาขา) ▾</button>
+    </div>
+
+    <div class="card-block">
+      <h3>What if...?</h3>
+      <div class="sub">ลองจำลองดูว่า ถ้าคุณพัฒนาด้านใดด้านหนึ่งให้ดีขึ้น คะแนนความเหมาะสมจะเปลี่ยนไปอย่างไร</div>
+      <div class="whatif-buttons" id="whatifButtons"></div>
+      <div class="whatif-results" id="whatifResults"></div>
+    </div>
+
+    <div class="card-block ai-card">
+      <h3>AI Insights</h3>
+      <div class="sub">
+        วิเคราะห์จุดแข็งและจุดที่ควรพัฒนาจากผลคะแนนของคุณ ด้วย Gemini AI
+        &nbsp;·&nbsp;<button class="key-link" onclick="openKeyModal()" id="keyLinkText">ตั้งค่า Gemini API key</button>
+      </div>
+      <button class="ai-generate-btn" id="aiGenerateBtn" onclick="generateAIInsights()">
+        <span class="spinner" id="aiSpinner"></span>
+        <span id="aiBtnLabel">✦ Generate AI Insights</span>
+      </button>
+      <div class="ai-error" id="aiError"></div>
+      <div class="ai-results" id="aiResults">
+        <div>
+          <div class="ai-col-title"><span class="dot-good"></span>Strengths</div>
+          <ul class="ai-list" id="strengthsList"></ul>
+        </div>
+        <div>
+          <div class="ai-col-title"><span class="dot-bad"></span>Weaknesses / Growth Areas</div>
+          <ul class="ai-list" id="weaknessesList"></ul>
+        </div>
+      </div>
+    </div>
+
+    <button class="retake-btn" onclick="restartTest()">ทำแบบทดสอบอีกครั้ง</button>
+    <footer class="note">คะแนนทั้งหมดคำนวณในเบราว์เซอร์ของคุณ ส่วน AI Insights จะส่งเฉพาะคะแนนสรุป (ไม่ใช่คำตอบรายข้อ) ไปยัง Gemini API</footer>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="keyModal">
+  <div class="modal-card">
+    <h3>Gemini API Key</h3>
+    <p>รับฟรีได้ที่ <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a> — ไม่ต้องผูกบัตรเครดิต คีย์นี้จะถูกเก็บไว้ในหน่วยความจำของแท็บนี้เท่านั้น ไม่ถูกบันทึกหรือส่งไปที่อื่น</p>
+    <input type="password" class="modal-input" id="keyInput" placeholder="AIza...">
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeKeyModal()">ยกเลิก</button>
+      <button class="modal-save" onclick="saveKey()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+
+const questions = [
+  {id:1, section:"ความสนใจ", text:"ฉันชอบแกะอุปกรณ์อิเล็กทรอนิกส์หรือระบบกลไกเพื่อเข้าใจการทำงานของวงจรและโปรเซสเซอร์", majors:["compeng"]},
+  {id:2, section:"ความสนใจ", text:"ฉันสนใจการแก้ปัญหาเชิงนามธรรม เช่น อัลกอริทึมและโครงสร้างข้อมูล", majors:["compsci"]},
+  {id:3, section:"ความสนใจ", text:"ฉันสนใจระบบร่างกายมนุษย์ โรค และการวินิจฉัยทางการแพทย์", majors:["medicine"]},
+  {id:4, section:"ความสนใจ", text:"ฉันสนใจการวิเคราะห์ตลาด ธุรกิจ และการลงทุน", majors:["business"]},
+  {id:5, section:"ความสนใจ", text:"ฉันสนใจกฎหมาย นโยบาย และการตีความกฎหมาย", majors:["law"]},
+  {id:6, section:"ความสนใจ", text:"ฉันชอบออกแบบพื้นที่ สเก็ตช์ และงานสถาปัตยกรรม", majors:["architecture"]},
+  {id:7, section:"ความสนใจ", text:"ฉันชอบสอน แนะนำ และช่วยให้คนอื่นเข้าใจสิ่งยาก", majors:["education"]},
+  {id:8, section:"ความสนใจ", text:"ฉันสนใจพฤติกรรมมนุษย์ อารมณ์ และจิตวิทยา", majors:["psychology"]},
+
+  {id:9, section:"ค่านิยม", text:"งานของฉันควรช่วยเหลือผู้อื่นโดยตรง", majors:["medicine","psychology","education"]},
+  {id:10, section:"ค่านิยม", text:"ฉันให้ความสำคัญกับความเชี่ยวชาญทางเทคนิคมากกว่าการเป็นผู้บริหาร", majors:["compeng","compsci"]},
+  {id:11, section:"ค่านิยม", text:"ฉันวัดความสำเร็จจากการเป็นผู้นำและสร้างผลกระทบทางธุรกิจ", majors:["business"]},
+  {id:12, section:"ค่านิยม", text:"ฉันยึดมั่นในความยุติธรรมและกฎหมาย", majors:["law"]},
+  {id:13, section:"ค่านิยม", text:"ฉันให้ความสำคัญกับความคิดสร้างสรรค์ด้านการออกแบบ", majors:["architecture"]},
+  {id:14, section:"ค่านิยม", text:"ฉันเชื่อในหลักฐานเชิงวิทยาศาสตร์", majors:["medicine","compsci"]},
+  {id:15, section:"ค่านิยม", text:"ฉันต้องการพัฒนาสังคมและการศึกษา", majors:["education"]},
+
+  {id:16, section:"รูปแบบการทำงาน", text:"ฉันชอบงานที่มีโครงสร้างและกฎชัดเจน", majors:["law","compeng"]},
+  {id:17, section:"รูปแบบการทำงาน", text:"ฉันชอบทดลองและแก้บั๊กแบบรวดเร็ว (เช่น coding)", majors:["compsci"]},
+  {id:18, section:"รูปแบบการทำงาน", text:"ฉันชอบทำงานในแล็บกับฮาร์ดแวร์", majors:["compeng"]},
+  {id:19, section:"รูปแบบการทำงาน", text:"ฉันทำงานได้ดีในสถานการณ์กดดันสูง", majors:["medicine"]},
+  {id:20, section:"รูปแบบการทำงาน", text:"ฉันชอบทำงานร่วมกับคนและสื่อสาร", majors:["business","education","psychology"]},
+  {id:21, section:"รูปแบบการทำงาน", text:"ฉันชอบทำงานคนเดียวแบบใช้สมาธิสูง", majors:["compsci"]},
+  {id:22, section:"รูปแบบการทำงาน", text:"ฉันชอบทำงานในสตูดิโอและสร้างโมเดล", majors:["architecture"]},
+
+  {id:23, section:"ความคิดสร้างสรรค์", text:"ฉันคิดภาพโครงสร้าง 3 มิติได้ดี", majors:["architecture"]},
+  {id:24, section:"ความคิดสร้างสรรค์", text:"ฉันเก่งการปรับปรุงอัลกอริทึม", majors:["compsci"]},
+  {id:25, section:"ความคิดสร้างสรรค์", text:"ฉันอธิบายเรื่องยากให้คนเข้าใจง่ายได้", majors:["education"]},
+  {id:26, section:"ความคิดสร้างสรรค์", text:"ฉันคิดไอเดียธุรกิจใหม่ๆ ได้", majors:["business"]},
+  {id:27, section:"ความคิดสร้างสรรค์", text:"ฉันตีความกฎหมายหรือข้อมูลเพื่อสร้าง argument ได้", majors:["law"]},
+  {id:28, section:"ความคิดสร้างสรรค์", text:"ฉันช่วยคนมองปัญหาชีวิตในมุมใหม่ได้", majors:["psychology"]},
+  {id:29, section:"ความคิดสร้างสรรค์", text:"ฉันออกแบบวงจรหรือฮาร์ดแวร์ได้", majors:["compeng"]},
+
+  {id:30, section:"การคิดเชิงตรรกะ", text:"ฉันเข้าใจตรรกะเชิงสัญลักษณ์ (boolean, proof)", majors:["compsci"]},
+  {id:31, section:"การคิดเชิงตรรกะ", text:"ฉันจับข้อผิดพลาดในเหตุผลหรือกฎหมายได้", majors:["law"]},
+  {id:32, section:"การคิดเชิงตรรกะ", text:"ฉันวิเคราะห์ข้อมูลตัวเลขและการเงินได้", majors:["business"]},
+  {id:33, section:"การคิดเชิงตรรกะ", text:"ฉันวินิจฉัยปัญหาจากข้อมูลหลายปัจจัยได้", majors:["medicine"]},
+  {id:34, section:"การคิดเชิงตรรกะ", text:"ฉันเข้าใจโครงสร้างและแรงทางกายภาพ", majors:["architecture"]},
+  {id:35, section:"การคิดเชิงตรรกะ", text:"ฉันวิเคราะห์พฤติกรรมมนุษย์ได้", majors:["psychology"]},
+  {id:36, section:"การคิดเชิงตรรกะ", text:"ฉันวิเคราะห์วงจรและสัญญาณไฟฟ้าได้", majors:["compeng"]},
+
+  {id:37, section:"ภาวะผู้นำ", text:"ฉันเป็นผู้นำ วางแผน และจัดการทีม", majors:["business"]},
+  {id:38, section:"ภาวะผู้นำ", text:"ฉันเก่งการเจรจาและโน้มน้าว", majors:["law","business"]},
+  {id:39, section:"ภาวะผู้นำ", text:"ฉันนำทีมด้วยความเชี่ยวชาญด้านเทคนิค", majors:["compeng"]},
+  {id:40, section:"ภาวะผู้นำ", text:"ฉันช่วยพัฒนาคนและทีม", majors:["education"]},
+  {id:41, section:"ภาวะผู้นำ", text:"ฉันควบคุมสถานการณ์ฉุกเฉินได้", majors:["medicine"]},
+  {id:42, section:"ภาวะผู้นำ", text:"ฉันนำงานออกแบบและวิสัยทัศน์", majors:["architecture"]},
+  {id:43, section:"ภาวะผู้นำ", text:"ฉันผลักดันการเปลี่ยนแปลงในสังคม", majors:["psychology","education"]},
+
+  {id:44, section:"การสื่อสาร", text:"ฉันเข้าใจอารมณ์และรับฟังผู้อื่นได้ดี", majors:["psychology"]},
+  {id:45, section:"การสื่อสาร", text:"ฉันพูดและโต้แย้งในที่สาธารณะได้ดี", majors:["law"]},
+  {id:46, section:"การสื่อสาร", text:"ฉันอธิบายบทเรียนให้เข้าใจง่าย", majors:["education"]},
+  {id:47, section:"การสื่อสาร", text:"ฉันเขียนเอกสารเทคนิคได้ชัดเจน", majors:["compeng","compsci"]},
+  {id:48, section:"การสื่อสาร", text:"ฉันสื่อสารผ่านภาพและแบบได้ดี", majors:["architecture"]},
+  {id:49, section:"การสื่อสาร", text:"ฉันนำเสนอธุรกิจและเจรจาได้", majors:["business"]},
+  {id:50, section:"การสื่อสาร", text:"ฉันซักถามข้อมูลเชิงลึกจากผู้คนได้", majors:["medicine","psychology"]},
+
+  {id:51, section:"ความพากเพียร", text:"ฉันอดทนแก้บั๊กโค้ดนานๆ ได้", majors:["compsci"]},
+  {id:52, section:"ความพากเพียร", text:"ฉันอดทนแก้ปัญหาฮาร์ดแวร์ได้", majors:["compeng"]},
+  {id:53, section:"ความพากเพียร", text:"ฉันทนเรียนหนักและฝึกงานยาวได้", majors:["medicine"]},
+  {id:54, section:"ความพากเพียร", text:"ฉันรับคำวิจารณ์และแก้งานซ้ำได้", majors:["architecture"]},
+  {id:55, section:"ความพากเพียร", text:"ฉันอ่านเอกสารยาวๆ ได้ละเอียด", majors:["law"]},
+  {id:56, section:"ความพากเพียร", text:"ฉันทำวิจัยระยะยาวได้", majors:["psychology","compsci"]},
+  {id:57, section:"ความพากเพียร", text:"ฉันอดทนสอนคนที่ยังไม่เข้าใจได้", majors:["education"]}
+];
+
+const majors = [
+  {key:"compeng", name:"Computer Engineering", code:"R-I-C",
+    riasec:[{letter:"R",weight:1.0},{letter:"I",weight:0.7},{letter:"C",weight:0.5}],
+    traits:"Conscientiousness, Openness", aptitude:"Numerical, Diagrammatic, Abstract",
+    style:"Technical, Systemic — Hardware-Software Integration"},
+  {key:"compsci", name:"Computer Science", code:"I-C-R",
+    riasec:[{letter:"I",weight:1.0},{letter:"C",weight:0.7},{letter:"R",weight:0.5}],
+    traits:"Conscientiousness, Openness", aptitude:"Logical, Abstract, Numerical",
+    style:"Solitary Focus, Iterative Logic, Abstract Systems"},
+  {key:"medicine", name:"Medicine", code:"I-S-R",
+    riasec:[{letter:"I",weight:1.0},{letter:"S",weight:0.7},{letter:"R",weight:0.5}],
+    traits:"Conscientiousness, Agreeableness", aptitude:"Logical, Empirical Reasoning, Stress Tolerance",
+    style:"Diagnostic, High-Stakes Clinical Care, Empirical"},
+  {key:"business", name:"Business", code:"E-C-S",
+    riasec:[{letter:"E",weight:1.0},{letter:"C",weight:0.7},{letter:"S",weight:0.5}],
+    traits:"Extraversion, Conscientiousness", aptitude:"Numerical, Verbal Reasoning",
+    style:"Strategic, Goal-Oriented, Organizational"},
+  {key:"law", name:"Law", code:"E-I-S",
+    riasec:[{letter:"E",weight:1.0},{letter:"I",weight:0.7},{letter:"S",weight:0.5}],
+    traits:"Extraversion, Conscientiousness", aptitude:"Verbal Reasoning, Critical Deductive Logic",
+    style:"Analytical Advocacy, Rules-Based Argumentation"},
+  {key:"architecture", name:"Architecture", code:"A-R-E",
+    riasec:[{letter:"A",weight:1.0},{letter:"R",weight:0.7},{letter:"E",weight:0.5}],
+    traits:"Openness to Experience", aptitude:"Spatial, Abstract, Diagrammatic",
+    style:"Creative Synthesis, Visual-Structural Execution"},
+  {key:"education", name:"Education", code:"S-A-E",
+    riasec:[{letter:"S",weight:1.0},{letter:"A",weight:0.7},{letter:"E",weight:0.5}],
+    traits:"Agreeableness, Extraversion", aptitude:"Verbal, Pedagogical Logic",
+    style:"Interpersonal Development, Collaborative Mentorship"},
+  {key:"psychology", name:"Psychology", code:"S-I-A",
+    riasec:[{letter:"S",weight:1.0},{letter:"I",weight:0.7},{letter:"A",weight:0.5}],
+    traits:"Agreeableness, Openness", aptitude:"Verbal, Inductive & Human Behavioral Logic",
+    style:"Empirical Human Care, Analytical Counseling"}
+];
+
+const RIASEC_LABELS = {R:"Realistic", I:"Investigative", A:"Artistic", S:"Social", E:"Enterprising", C:"Conventional"};
+
+// Canned "why this major fits" explanations — sourced/translated from the psychometric
+// report's "AI Match Justification Engine" templates. Rendered dynamically using the
+// person's real scores, no live model call.
+const WHY_TEMPLATES = {
+  compeng: [
+    "สนใจไมโครคอนโทรลเลอร์ วงจร และฮาร์ดแวร์คอมพิวเตอร์ในระดับสูง",
+    "ผสมผสานการคิดเชิงตรรกะ การวิเคราะห์สัญญาณวงจร และการคิดเชิงพื้นที่ได้ดีเยี่ยม",
+    "มีความอดทนสูงในการแก้ปัญหาฮาร์ดแวร์และทำงานในแล็บอย่างต่อเนื่อง"
+  ],
+  compsci: [
+    "มีความสามารถโดดเด่นด้านตรรกะเชิงสัญลักษณ์และการแก้โจทย์เชิงอัลกอริทึม",
+    "ชอบทำงานคนเดียวแบบมีสมาธิสูงและถนัดออกแบบระบบซอฟต์แวร์",
+    "มีความยืดหยุ่นสูงในการนั่งไล่หาบั๊กโค้ดเป็นเวลานานโดยไม่ท้อ"
+  ],
+  medicine: [
+    "อยากรู้เรื่องระบบร่างกายมนุษย์ พยาธิวิทยา และงานวิจัยทางการแพทย์",
+    "อยากช่วยเหลือผู้อื่นโดยตรง และควบคุมอารมณ์ได้ดีในสถานการณ์กดดันสูง",
+    "วิเคราะห์อาการ ตัดสาเหตุที่เป็นไปได้ และสื่อสารกับผู้ป่วยด้วยความเข้าอกเข้าใจ"
+  ],
+  business: [
+    "มีแรงขับสูงในการนำทีม ตั้งเป้าหมาย และขยายองค์กรทางธุรกิจ",
+    "วิเคราะห์ข้อมูลการเงินและมองเห็นโอกาสทางการตลาดได้ดี",
+    "มั่นใจในการนำเสนอ เจรจา และโน้มน้าวผู้มีส่วนได้ส่วนเสีย"
+  ],
+  law: [
+    "ยึดมั่นในความยุติธรรม สิทธิตามกฎหมาย และความเป็นธรรมเชิงกระบวนการ",
+    "จับข้อผิดพลาดในเหตุผลและตีความข้อกฎหมายได้อย่างแหลมคม",
+    "อ่านเอกสารกฎหมายจำนวนมากและโต้แย้งในที่สาธารณะได้อย่างมั่นใจ"
+  ],
+  architecture: [
+    "จินตนาการโครงสร้างสามมิติและผังพื้นที่ได้อย่างโดดเด่น",
+    "มีความสมดุลระหว่างความคิดสร้างสรรค์ด้านการออกแบบและความเข้าใจโครงสร้าง",
+    "ทนต่อคำวิจารณ์และออกแบบงานใหม่ซ้ำๆ ในสตูดิโอได้ดี"
+  ],
+  education: [
+    "มีความสุขที่ได้ชี้แนะ สอน และสนับสนุนพัฒนาการของผู้เรียน",
+    "อธิบายเรื่องซับซ้อนให้เข้าใจง่ายผ่านตัวอย่างและกิจกรรม",
+    "อดทนรับฟังและดูแลกลุ่มผู้เรียนที่หลากหลายได้ดี"
+  ],
+  psychology: [
+    "สนใจอารมณ์ พัฒนาการบุคลิกภาพ และงานวิจัยทางจิตวิทยา",
+    "วิเคราะห์ข้อมูลและจับรูปแบบพฤติกรรมมนุษย์ได้ดี",
+    "อดทนรับฟังและช่วยให้คนอื่นมองปัญหาชีวิตในมุมใหม่ได้"
+  ]
+};
+
+const SKILL_TEMPLATES = {
+  compeng: [
+    "เขียนโปรแกรมระบบฝังตัว (C/C++, Assembly)",
+    "ออกแบบวงจรดิจิทัลและใช้ภาษา HDL เช่น VHDL",
+    "การประมวลผลสัญญาณและการใช้ออสซิลโลสโคป",
+    "การออกแบบร่วมฮาร์ดแวร์-ซอฟต์แวร์ (hardware-software co-design)"
+  ],
+  compsci: [
+    "โครงสร้างข้อมูลขั้นสูงและการวิเคราะห์ความซับซ้อนของอัลกอริทึม",
+    "สถาปัตยกรรมซอฟต์แวร์เชิงวัตถุและ design patterns",
+    "การทดสอบอัตโนมัติ, Git, และ CI/CD pipeline",
+    "คณิตศาสตร์ดิสครีตประยุกต์และการพิสูจน์ตรรกะ"
+  ],
+  medicine: [
+    "การให้เหตุผลวินิจฉัยแยกโรคและวิเคราะห์เคสทางคลินิก",
+    "กายวิภาคศาสตร์ เคมีชีวภาพ และศัพท์พยาธิวิทยา",
+    "เทคนิคจัดการความเครียดและควบคุมสติในภาวะวิกฤต",
+    "การสัมภาษณ์ผู้ป่วยด้วยความเข้าอกเข้าใจ"
+  ],
+  business: [
+    "การสร้างแบบจำลองการเงิน บัญชี และวิเคราะห์ข้อมูลเชิงปริมาณ",
+    "การพูดนำเสนอผู้บริหารและเล่าเรื่องผ่านสไลด์",
+    "กรอบการเจรจาต่อรองและแก้ไขข้อขัดแย้งเชิงกลยุทธ์",
+    "การมอบหมายงานข้ามทีมและติดตามผลการดำเนินงาน"
+  ],
+  law: [
+    "การเขียนกฎหมายเชิงวิพากษ์และวิเคราะห์ข้อบังคับ",
+    "ตรรกะเชิงนิรนัยและการระบุ fallacy",
+    "การโต้วาทีสาธารณะและซักถามพยานอย่างเป็นทางการ",
+    "การสืบค้นฐานข้อมูลกฎหมายและสังเคราะห์เอกสารอย่างมีประสิทธิภาพ"
+  ],
+  architecture: [
+    "โมเดล CAD สามมิติและซอฟต์แวร์ออกแบบพาราเมตริก (Revit)",
+    "สถิตยศาสตร์โครงสร้าง กลศาสตร์ และวัสดุศาสตร์พื้นฐาน",
+    "การนำเสนอภาพกราฟิกและสร้างโมเดลจำลอง",
+    "ความยืดหยุ่นต่อคำวิจารณ์และการทำซ้ำโปรเจกต์"
+  ],
+  education: [
+    "ออกแบบหลักสูตรเชิงการสอนและวางแผนผลลัพธ์การเรียนรู้",
+    "การบริหารจัดการชั้นเรียนและเสริมพฤติกรรมเชิงบวก",
+    "การพูดในที่สาธารณะและการนำเสนอแนวคิดอย่างมีชีวิตชีวา",
+    "กลยุทธ์การสอนที่หลากหลายตามรูปแบบการเรียนรู้ของผู้เรียน"
+  ],
+  psychology: [
+    "วิธีวิจัยเชิงประจักษ์และออกแบบโพรโทคอลการทดลอง",
+    "การวิเคราะห์สถิติเชิงปริมาณและการสร้างแบบจำลองข้อมูล (SPSS/R)",
+    "การรับฟังเชิงบำบัดอย่างตั้งใจและการสัมภาษณ์ด้วยความเข้าอกเข้าใจ",
+    "การสังเกตพฤติกรรม การเข้ารหัสข้อมูล และการวิเคราะห์เชิงอุปนัย"
+  ]
+};
+
+// Sections in quiz order, used to drive the What-if simulator buttons
+const SECTIONS = ["ความสนใจ","ค่านิยม","รูปแบบการทำงาน","ความคิดสร้างสรรค์","การคิดเชิงตรรกะ","ภาวะผู้นำ","การสื่อสาร","ความพากเพียร"];
+const SECTION_BOOST = 1.5; // simulated improvement per "what if" click, capped at 5
+
+/* ---------------- STATE ---------------- */
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let GEMINI_API_KEY = ''; // kept in memory only — never written to disk or localStorage
+
+/* ---------------- API KEY MODAL ---------------- */
+function openKeyModal(){
+  document.getElementById('keyInput').value = GEMINI_API_KEY;
+  document.getElementById('keyModal').classList.add('show');
+}
+function closeKeyModal(){
+  document.getElementById('keyModal').classList.remove('show');
+}
+function saveKey(){
+  const val = document.getElementById('keyInput').value.trim();
+  if(val){
+    GEMINI_API_KEY = val;
+    document.getElementById('keyLinkText').textContent = 'Gemini API key ✓ ตั้งค่าแล้ว';
+  }
+  closeKeyModal();
+}
+
+/* ---------------- NAV ---------------- */
+function startTest(){
+  document.getElementById('screen-intro').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.remove('hidden');
+  renderQuestion();
+}
+
+function restartTest(){
+  current = 0;
+  answers = new Array(questions.length).fill(null);
+  document.getElementById('screen-results').classList.add('hidden');
+  document.getElementById('screen-intro').classList.remove('hidden');
+  document.getElementById('progressBar').style.width = '0%';
+  document.getElementById('progressNum').textContent = '0 / ' + questions.length;
+}
+
+function renderQuestion(){
+  const q = questions[current];
+  document.getElementById('sectionTag').textContent = q.section;
+  document.getElementById('qIndex').textContent = 'คำถามที่ ' + (current+1) + ' / ' + questions.length;
+  document.getElementById('qText').textContent = q.text;
+  document.getElementById('backBtn').disabled = current === 0;
+
+  document.querySelectorAll('.pill').forEach(p=>{
+    p.classList.remove('selected');
+    if(answers[current] !== null && parseInt(p.dataset.val) === answers[current]){
+      p.classList.add('selected');
+    }
+  });
+
+  const pct = Math.round((current/questions.length)*100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressNum').textContent = current + ' / ' + questions.length;
+
+  const card = document.querySelector('.q-card');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = 'fadeUp .35s ease';
+}
+
+function answer(val){
+  answers[current] = val;
+  document.querySelectorAll('.pill').forEach(p=>{
+    p.classList.toggle('selected', parseInt(p.dataset.val) === val);
+  });
+  setTimeout(()=>{
+    if(current < questions.length - 1){
+      current++;
+      renderQuestion();
+    } else {
+      showResults();
+    }
+  }, 220);
+}
+
+function goBack(){
+  if(current > 0){
+    current--;
+    renderQuestion();
+  }
+}
+
+/* ---------------- SCORING ---------------- */
+function computeMajorScores(overrideAnswers){
+  const src = overrideAnswers || answers;
+  const sums = {}, counts = {};
+  majors.forEach(m=>{ sums[m.key]=0; counts[m.key]=0; });
+  questions.forEach((q,i)=>{
+    const val = src[i] || 3;
+    q.majors.forEach(mk=>{
+      sums[mk]+=val;
+      counts[mk]+=1;
+    });
+  });
+  const scores = {};
+  majors.forEach(m=>{
+    scores[m.key] = Math.round((sums[m.key]/(counts[m.key]*5))*1000)/10;
+  });
+  return scores;
+}
+
+function computeSectionScores(){
+  const sums={}, counts={};
+  questions.forEach((q,i)=>{
+    const val = answers[i] || 3;
+    sums[q.section] = (sums[q.section]||0) + val;
+    counts[q.section] = (counts[q.section]||0) + 1;
+  });
+  const out = {};
+  Object.keys(sums).forEach(s=>{
+    out[s] = Math.round((sums[s]/(counts[s]*5))*1000)/10;
+  });
+  return out;
+}
+
+function computeRiasec(majorScores){
+  const letters = ['R','I','A','S','E','C'];
+  const sums={}, wsums={};
+  letters.forEach(l=>{sums[l]=0; wsums[l]=0;});
+  majors.forEach(m=>{
+    m.riasec.forEach(r=>{
+      sums[r.letter] += majorScores[m.key]*r.weight;
+      wsums[r.letter] += r.weight;
+    });
+  });
+  const result={};
+  letters.forEach(l=>{
+    result[l] = wsums[l] ? Math.round((sums[l]/wsums[l])*10)/10 : 0;
+  });
+  return result;
+}
+
+/* ---------------- RESULTS RENDER ---------------- */
+function showResults(){
+  document.getElementById('screen-quiz').classList.add('hidden');
+  document.getElementById('screen-results').classList.remove('hidden');
+  document.getElementById('progressBar').style.width = '100%';
+  document.getElementById('progressNum').textContent = questions.length + ' / ' + questions.length;
+
+  const majorScores = computeMajorScores();
+  const riasec = computeRiasec(majorScores);
+  const sectionScores = computeSectionScores();
+
+  const ranked = majors.slice().sort((a,b)=> majorScores[b.key]-majorScores[a.key]);
+  const top = ranked[0];
+
+  // store for the AI insights call, with pct attached for easy prompt-building
+  lastRankedMajors = ranked.map(m => Object.assign({}, m, {pct: majorScores[m.key]}));
+  lastRiasec = riasec;
+  lastSectionScores = sectionScores;
+
+  // reset AI panel on every fresh result
+  document.getElementById('aiResults').classList.remove('show');
+  document.getElementById('aiError').classList.remove('show');
+
+  document.getElementById('topMajorName').textContent = top.name;
+  document.getElementById('topMajorCode').textContent = top.code + '  ·  ' + top.traits;
+  document.getElementById('topMajorPct').textContent = majorScores[top.key] + '%';
+
+  renderRiasecBars(riasec);
+
+  function rankRowHTML(m, i){
+    return `
+    <div class="rank-row">
+      <div class="rank-num">${i+1}</div>
+      <div class="rank-main">
+        <div class="rank-top">
+          <span class="rank-name">${m.name}</span>
+          <span class="rank-pct">${majorScores[m.key]}%</span>
+        </div>
+        <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${majorScores[m.key]}%"></div></div>
+        <div class="rank-detail"><span class="code-badge">${m.code}</span>${m.aptitude} — ${m.style}</div>
+        <div class="rank-actions">
+          <button class="why-btn" onclick="toggleWhy('${m.key}')">ทำไมถึงเหมาะ?</button>
+          <button class="why-btn skill-btn" onclick="toggleSkills('${m.key}')">ทักษะที่ควรพัฒนา</button>
+        </div>
+        <div class="why-panel" id="why-${m.key}">
+          <div class="why-lede">${m.name} (${m.code}) เหมาะกับคุณเพราะ...</div>
+          <ul>${WHY_TEMPLATES[m.key].map(t=>`<li>${t}</li>`).join('')}</ul>
+        </div>
+        <div class="why-panel" id="skills-${m.key}">
+          <div class="why-lede">ทักษะที่ควรพัฒนาสำหรับ ${m.name}</div>
+          <ul>${SKILL_TEMPLATES[m.key].map(t=>`<li>${t}</li>`).join('')}</ul>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('rankListTop').innerHTML = ranked.slice(0,3).map((m,i)=> rankRowHTML(m,i)).join('');
+  document.getElementById('rankListRest').innerHTML = ranked.slice(3).map((m,i)=> rankRowHTML(m,i+3)).join('');
+  document.getElementById('rankListRest').classList.add('hidden');
+  document.getElementById('viewAllBtn').textContent = 'ดูผลลัพธ์ทั้งหมด (8 สาขา) ▾';
+
+  renderWhatifButtons();
+}
+
+function toggleAllResults(){
+  const rest = document.getElementById('rankListRest');
+  const btn = document.getElementById('viewAllBtn');
+  const showing = rest.classList.toggle('hidden');
+  btn.textContent = showing ? 'ดูผลลัพธ์ทั้งหมด (8 สาขา) ▾' : 'ซ่อนผลลัพธ์ที่เหลือ ▴';
+}
+
+function toggleWhy(key){
+  document.getElementById('why-' + key).classList.toggle('show');
+}
+
+function toggleSkills(key){
+  document.getElementById('skills-' + key).classList.toggle('show');
+}
+
+/* ---------------- WHAT-IF SIMULATOR ---------------- */
+function renderWhatifButtons(){
+  const wrap = document.getElementById('whatifButtons');
+  wrap.innerHTML = SECTIONS.map(s=>
+    `<button class="whatif-btn" id="wb-${s}" onclick="simulateWhatIf('${s}')">ถ้าฉันพัฒนา “${s}”</button>`
+  ).join('');
+  document.getElementById('whatifResults').innerHTML = '';
+}
+
+function simulateWhatIf(section){
+  document.querySelectorAll('.whatif-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('wb-' + section).classList.add('active');
+
+  // boost every item belonging to this section, capped at 5
+  const modified = answers.slice();
+  const affectedKeys = new Set();
+  questions.forEach((q,i)=>{
+    if(q.section === section){
+      const base = modified[i] || 3;
+      modified[i] = Math.min(5, base + SECTION_BOOST);
+      q.majors.forEach(mk=>affectedKeys.add(mk));
+    }
+  });
+
+  const oldScores = computeMajorScores();
+  const newScores = computeMajorScores(modified);
+
+  const rows = majors
+    .filter(m=>affectedKeys.has(m.key))
+    .map(m=> ({name:m.name, oldPct:oldScores[m.key], newPct:newScores[m.key]}))
+    .sort((a,b)=> (b.newPct-b.oldPct) - (a.newPct-a.oldPct));
+
+  const box = document.getElementById('whatifResults');
+  if(rows.length === 0){
+    box.innerHTML = `<div class="whatif-empty">ด้านนี้ไม่ส่งผลต่อสาขาที่คำนวณไว้อย่างมีนัยสำคัญ</div>`;
+    return;
+  }
+  box.innerHTML = rows.map(r=>`
+    <div class="whatif-row">
+      <span>${r.name}</span>
+      <span class="whatif-delta"><span class="old">${r.oldPct}%</span><span class="arrow">→</span><span class="new">${r.newPct}%</span></span>
+    </div>
+  `).join('');
+}
+
+/* ---------------- AI INSIGHTS (Gemini) ---------------- */
+let lastRankedMajors = null;
+let lastRiasec = null;
+let lastSectionScores = null;
+
+async function generateAIInsights(){
+  const errBox = document.getElementById('aiError');
+  const resultsBox = document.getElementById('aiResults');
+  errBox.classList.remove('show');
+  errBox.textContent = '';
+
+  if(!GEMINI_API_KEY){
+    openKeyModal();
+    return;
+  }
+
+  const btn = document.getElementById('aiGenerateBtn');
+  const spinner = document.getElementById('aiSpinner');
+  const label = document.getElementById('aiBtnLabel');
+  btn.disabled = true;
+  spinner.classList.add('show');
+  label.textContent = 'Analyzing...';
+  resultsBox.classList.remove('show');
+
+  const top3 = lastRankedMajors.slice(0,3);
+  const majorSummary = top3.map((m,i)=> `${i+1}. ${m.name} (${m.code}) — ${m.pct}% — style: ${m.style}`).join('\n');
+  const riasecSummary = Object.keys(lastRiasec).map(l => `${l}(${RIASEC_LABELS[l]}): ${lastRiasec[l]}%`).join(', ');
+  const sectionSummary = Object.keys(lastSectionScores).map(s => `${s}: ${lastSectionScores[s]}%`).join(', ');
+
+  const prompt = `You are a career-assessment analyst. Based on this person's RIASEC + major-fit quiz results, write a short personalized analysis.
+
+Top matching majors:
+${majorSummary}
+
+RIASEC profile (0-100%): ${riasecSummary}
+Behavioral sub-scores (0-100%): ${sectionSummary}
+
+Return STRICT JSON only, no markdown, no code fences, matching exactly this shape:
+{"strengths": ["...", "...", "..."], "weaknesses": ["...", "...", "..."]}
+
+Rules:
+- 3 to 4 items in each array.
+- Each item under 16 words, specific and grounded in the actual scores above (not generic).
+- "strengths" = traits/aptitudes that stand out as high and support the top major.
+- "weaknesses" = the lowest-scoring relevant areas, framed constructively as growth areas, not harshly.
+- Write in Thai.`;
+
+  try{
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':'application/json',
+        'Authorization': `Bearer ${GEMINI_API_KEY}`
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: 'application/json', temperature: 0.7 }
+      })
+    });
+
+    if(!resp.ok){
+      const errData = await resp.json().catch(()=>({}));
+      throw new Error(errData?.error?.message || `Request failed (${resp.status})`);
+    }
+
+    const data = await resp.json();
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if(!rawText) throw new Error('ไม่ได้รับข้อความตอบกลับจาก Gemini');
+
+    const parsed = JSON.parse(rawText);
+    if(!parsed.strengths || !parsed.weaknesses) throw new Error('รูปแบบข้อมูลที่ได้ไม่ถูกต้อง');
+
+    document.getElementById('strengthsList').innerHTML = parsed.strengths.map(s=>`<li>${s}</li>`).join('');
+    document.getElementById('weaknessesList').innerHTML = parsed.weaknesses.map(s=>`<li>${s}</li>`).join('');
+    resultsBox.classList.add('show');
+
+  }catch(err){
+    errBox.textContent = 'เกิดข้อผิดพลาด: ' + err.message + ' — ตรวจสอบ API key หรือลองใหม่อีกครั้ง';
+    errBox.classList.add('show');
+  }finally{
+    btn.disabled = false;
+    spinner.classList.remove('show');
+    label.textContent = '✦ Generate AI Insights';
+  }
+}
+
+function renderRiasecBars(riasec){
+  const letters = ['R','I','A','S','E','C'];
+  const wrap = document.getElementById('riasecBars');
+  wrap.innerHTML = letters.map(l => `
+    <div class="riasec-bar-row">
+      <div class="riasec-bar-label">
+        <span class="letter">${l}</span>
+        <span class="name">${RIASEC_LABELS[l]}</span>
+      </div>
+      <div class="riasec-bar-track">
+        <div class="riasec-bar-fill" style="width:${riasec[l]}%"></div>
+      </div>
+      <div class="riasec-bar-value">${riasec[l]}</div>
+    </div>
+  `).join('');
+}
+</script>
+</body>
+</html>
